@@ -3,6 +3,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
+#include <wchar.h>
 
 #include <libopencm3/cm3/cortex.h>
 #include <libopencm3/cm3/systick.h>
@@ -22,9 +24,15 @@
 
 #include "assert.h"
 
+#define PRIORITY_GROUP       3
+
 // LED
 #define LED_PORT             GPIOC
 #define LED_PIN              GPIO13
+
+// DEBUG
+#define DEBUG_PORT           GPIOC
+#define DEBUG_PIN            GPIO14
 
 // Display
 #define DISPLAY_SPI          SPI2
@@ -86,3 +94,6 @@
 #define KEYBOARD_LEFT        PB2
 #define KEYBOARD_DOWN        PB10
 #define KEYBOARD_UP          PB12
+
+#define max(a, b)  (((a) > (b)) ? (a) : (b))
+#define min(a, b)  (((a) < (b)) ? (a) : (b)) 

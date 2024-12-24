@@ -14,3 +14,15 @@ void vApplicationStackOverflowHook(TaskHandle_t xTask, char* pcTaskName ) {
 	(void) xTask;
 	ASSERT(pcTaskName);
 }
+
+void hard_fault_handler() {
+	ASSERT("Hard Fault.");
+}
+
+void bus_fault_handler() {
+	ASSERT("Bus Fault.");
+}
+
+void usage_fault_handler() {
+	ASSERT("Usage Fault.");
+}

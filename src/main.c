@@ -1,8 +1,8 @@
 
 #include "config.h"
 
-#include "task_controller.h"
-#include "task_display.h"
+#include "controller.h"
+#include "display.h"
 
 /* Set STM32 to 84 MHz. */
 static inline void clock_setup(void) {
@@ -19,23 +19,25 @@ static inline void gpio_setup(void) {
 	// LED
     gpio_mode_setup(LED_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, LED_PIN);
     gpio_set_output_options(LED_PORT, GPIO_OTYPE_OD, GPIO_OSPEED_2MHZ, LED_PIN);
+    gpio_set(LED_PORT, LED_PIN);
+
+	// DEBUG
+    gpio_mode_setup(DEBUG_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, DEBUG_PIN);
+    gpio_set_output_options(DEBUG_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_100MHZ, DEBUG_PIN);
+    gpio_clear(DEBUG_PORT, DEBUG_PIN);
     
     // Display
-}
-
-static inline void setup_spi(void) {
-    
 }
 
 int main(void) {
     clock_setup();
     gpio_setup();
-    setup_spi();
 
     // Initialize interrupt priority grouping
     scb_set_priority_grouping(SCB_AIRCR_PRIGROUP_GROUP16_NOSUB);
-    nvic_set_priority(NVIC_PENDSV_IRQ, 15<<4);
-    nvic_set_priority(NVIC_SYSTICK_IRQ, 15<<4);
+    nvic_set_priority(NVIC_SYSTICK_IRQ        , configKERNEL_INTERRUPT_PRIORITY);
+    nvic_set_priority(NVIC_PENDSV_IRQ         , configKERNEL_INTERRUPT_PRIORITY-1);
+    nvic_set_priority(NVIC_DMA1_STREAM4_IRQ   , configKERNEL_INTERRUPT_PRIORITY-2);
 
     // System
     //nvic_set_priority(NVIC_MEM_MANAGE_IRQ, 0);
@@ -45,15 +47,13 @@ int main(void) {
     //nvic_set_priority(NVIC_PENDSV_IRQ, 0xE0);
     //nvic_set_priority(NVIC_SYSTICK_IRQ, 0xE0);
 
+
     cm_enable_interrupts();
 
-    //if (xTaskCreate(controller_task, "Controller", 512*4, NULL, 4, &hControllerTask) != pdPASS)
-	//	__assert(__FILE__, __LINE__, "Controller task creation failed");
-
-    if (xTaskCreate(display_task, "Display", 512, NULL, 1, &hDisplayTask) != pdPASS) 
-        __assert(__FILE__, __LINE__, "Display task creation failed.");
+    display_setup();
+    controller_init();
 
     /* Infinite loop */
 	vTaskStartScheduler();
-    __assert(__FILE__, __LINE__, "Scheduler starting failed");
+    ASSERT("Scheduler starting failed");
 }
